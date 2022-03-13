@@ -14,7 +14,7 @@ contract KEEN is ERC20Burnable, Operator {
     using SafeMath for uint256;
 
     // Initial distribution for the first 24h genesis pools
-    uint256 public constant INITIAL_GENESIS_POOL_DISTRIBUTION = 2400 ether;
+    uint256 public constant INITIAL_GENESIS_POOL_DISTRIBUTION = 10000 ether;
     // Initial distribution for the day 2-5 KEEN-WETH LP -> KEEN pool
     uint256 public constant INITIAL_KEEN_POOL_DISTRIBUTION = 21600 ether;
     // Distribution for airdrops wallet
