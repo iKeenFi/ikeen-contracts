@@ -20,7 +20,7 @@ contract Epoch is Operator {
         uint256 _period,
         uint256 _startTime,
         uint256 _startEpoch
-    ) public {
+    ) {
         period = _period;
         startTime = _startTime;
         epoch = _startEpoch;
@@ -30,15 +30,15 @@ contract Epoch is Operator {
     /* ========== Modifier ========== */
 
     modifier checkStartTime {
-        require(now >= startTime, 'Epoch: not started yet');
+        require(block.timestamp >= startTime, "Epoch: not started yet");
 
         _;
     }
 
     modifier checkEpoch {
         uint256 _nextEpochPoint = nextEpochPoint();
-        if (now < _nextEpochPoint) {
-            require(msg.sender == operator(), 'Epoch: only operator allowed for pre-epoch');
+        if (block.timestamp < _nextEpochPoint) {
+            require(msg.sender == operator(), "Epoch: only operator allowed for pre-epoch");
             _;
         } else {
             _;
@@ -47,7 +47,7 @@ contract Epoch is Operator {
                 lastEpochTime = _nextEpochPoint;
                 ++epoch;
                 _nextEpochPoint = nextEpochPoint();
-                if (now < _nextEpochPoint) break;
+                if (block.timestamp < _nextEpochPoint) break;
             }
         }
     }
@@ -77,7 +77,7 @@ contract Epoch is Operator {
     /* ========== GOVERNANCE ========== */
 
     function setPeriod(uint256 _period) external onlyOperator {
-        require(_period >= 1 hours && _period <= 48 hours, '_period: out of range');
+        require(_period >= 1 hours && _period <= 48 hours, "_period: out of range");
         period = _period;
     }
 

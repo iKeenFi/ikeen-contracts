@@ -69,7 +69,7 @@ contract Boardroom is ShareWrapper, ContractGuard {
     // flags
     bool public initialized = false;
 
-    IERC20 public grape;
+    IERC20 public keen;
     ITreasury public treasury;
 
     mapping(address => Memberseat) public members;
@@ -116,11 +116,11 @@ contract Boardroom is ShareWrapper, ContractGuard {
     /* ========== GOVERNANCE ========== */
 
     function initialize(
-        IERC20 _grape,
+        IERC20 _keen,
         IERC20 _share,
         ITreasury _treasury
     ) public notInitialized {
-        grape = _grape;
+        keen = _keen;
         share = _share;
         treasury = _treasury;
 
@@ -181,8 +181,8 @@ contract Boardroom is ShareWrapper, ContractGuard {
         return treasury.nextEpochPoint();
     }
 
-    function getGrapePrice() external view returns (uint256) {
-        return treasury.getGrapePrice();
+    function getKeenPrice() external view returns (uint256) {
+        return treasury.getKeenPrice();
     }
 
     // =========== Member getters
@@ -225,7 +225,7 @@ contract Boardroom is ShareWrapper, ContractGuard {
             require(members[msg.sender].epochTimerStart.add(rewardLockupEpochs) <= treasury.epoch(), "Boardroom: still in reward lockup");
             members[msg.sender].epochTimerStart = treasury.epoch(); // reset timer
             members[msg.sender].rewardEarned = 0;
-            grape.safeTransfer(msg.sender, reward);
+            keen.safeTransfer(msg.sender, reward);
             emit RewardPaid(msg.sender, reward);
         }
     }
@@ -241,7 +241,7 @@ contract Boardroom is ShareWrapper, ContractGuard {
         BoardroomSnapshot memory newSnapshot = BoardroomSnapshot({time: block.number, rewardReceived: amount, rewardPerShare: nextRPS});
         boardroomHistory.push(newSnapshot);
 
-        grape.safeTransferFrom(msg.sender, address(this), amount);
+        keen.safeTransferFrom(msg.sender, address(this), amount);
         emit RewardAdded(msg.sender, amount);
     }
 
@@ -251,7 +251,7 @@ contract Boardroom is ShareWrapper, ContractGuard {
         address _to
     ) external onlyOperator {
         // do not allow to drain core tokens
-        require(address(_token) != address(grape), "grape");
+        require(address(_token) != address(keen), "keen");
         require(address(_token) != address(share), "share");
         _token.safeTransfer(_to, _amount);
     }

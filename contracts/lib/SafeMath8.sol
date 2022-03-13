@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.12;
+pragma solidity ^0.8.0;
 
 /**
+ * NOTE from Operator: this is unnecessary due to the new Solidity 0.8 typechecking,
+ * but I'm too lazy to remove its deep hooks into everything so I'll just keep it.
+ *
  * @dev Wrappers over Solidity's arithmetic operations with added overflow
  * checks.
  *

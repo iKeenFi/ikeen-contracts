@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.12;
+pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-
-// Note that this pool has no minter key of GRAPE (rewards).
-// Instead, the governance will call GRAPE distributeReward method and send reward to this pool at the beginning.
-contract GrapeGenesisRewardPool {
+// Note that this pool has no minter key of KEEN (rewards).
+// Instead, the governance will call KEEN distributeReward method and send reward to this pool at the beginning.
+contract KeenRewardPool {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -18,21 +17,20 @@ contract GrapeGenesisRewardPool {
 
     // Info of each user.
     struct UserInfo {
-        uint256 amount; // How many tokens the user has provided.
+        uint256 amount; // How many LP tokens the user has provided.
         uint256 rewardDebt; // Reward debt. See explanation below.
     }
 
     // Info of each pool.
     struct PoolInfo {
         IERC20 token; // Address of LP token contract.
-        uint256 allocPoint; // How many allocation points assigned to this pool. GRAPE to distribute.
-        uint256 lastRewardTime; // Last time that GRAPE distribution occurs.
-        uint256 accGrapePerShare; // Accumulated GRAPE per share, times 1e18. See below.
-        bool isStarted; // if lastRewardBlock has passed
+        uint256 allocPoint; // How many allocation points assigned to this pool. KEEN to distribute in the pool.
+        uint256 lastRewardTime; // Last time that KEEN distribution occurred.
+        uint256 accKeenPerShare; // Accumulated KEEN per share, times 1e18. See below.
+        bool isStarted; // if lastRewardTime has passed
     }
 
-    IERC20 public grape;
-    address public mim;
+    IERC20 public keen;
 
     // Info of each pool.
     PoolInfo[] public poolInfo;
@@ -43,51 +41,47 @@ contract GrapeGenesisRewardPool {
     // Total allocation points. Must be the sum of all allocation points in all pools.
     uint256 public totalAllocPoint = 0;
 
-    // The time when GRAPE mining starts.
+    // The time when KEEN mining starts.
     uint256 public poolStartTime;
 
-    // The time when GRAPE mining ends.
-    uint256 public poolEndTime;
+    uint256[] public epochTotalRewards = [10800 ether, 10800 ether];
 
-    // TESTNET
-    uint256 public grapePerSecond = 0.66667 ether; // 2400 GRAPE / (1h * 60min * 60s)
-    uint256 public runningTime = 1 hours; // 1 hours
-    uint256 public constant TOTAL_REWARDS = 2400 ether;
-    // END TESTNET
+    // Time when each epoch ends.
+    uint256[3] public epochEndTimes;
 
-    // MAINNET
-    //uint256 public grapePerSecond = 0.02777 ether; // 2400 GRAPE / (24h * 60min * 60s)
-    //uint256 public runningTime = 1 days; // 1 days
-    //uint256 public constant TOTAL_REWARDS = 2400 ether;
-    // END MAINNET
+    // Reward per second for each of 2 epochs (last item is equal to 0 - for sanity).
+    uint256[3] public epochKeenPerSecond;
 
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
     event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
     event EmergencyWithdraw(address indexed user, uint256 indexed pid, uint256 amount);
     event RewardPaid(address indexed user, uint256 amount);
 
-    constructor(
-        address _grape,
-        address _mim,
-        uint256 _poolStartTime
-    ) public {
+    constructor(address _keen, uint256 _poolStartTime) {
         require(block.timestamp < _poolStartTime, "late");
-        if (_grape != address(0)) grape = IERC20(_grape);
-        if (_mim != address(0)) mim = _mim;
+        if (_keen != address(0)) keen = IERC20(_keen);
+
         poolStartTime = _poolStartTime;
-        poolEndTime = poolStartTime + runningTime;
+
+        epochEndTimes[0] = poolStartTime + 4 days; // Day 2-5
+        epochEndTimes[1] = epochEndTimes[0] + 5 days; // Day 6-10
+
+        epochKeenPerSecond[0] = epochTotalRewards[0].div(4 days);
+        epochKeenPerSecond[1] = epochTotalRewards[1].div(5 days);
+
+        epochKeenPerSecond[2] = 0;
         operator = msg.sender;
     }
 
     modifier onlyOperator() {
-        require(operator == msg.sender, "GrapeGenesisPool: caller is not the operator");
+        require(operator == msg.sender, "KeenRewardPool: caller is not the operator");
         _;
     }
 
     function checkPoolDuplicate(IERC20 _token) internal view {
         uint256 length = poolInfo.length;
         for (uint256 pid = 0; pid < length; ++pid) {
-            require(poolInfo[pid].token != _token, "GrapeGenesisPool: existing pool?");
+            require(poolInfo[pid].token != _token, "KeenRewardPool: existing pool?");
         }
     }
 
@@ -118,13 +112,13 @@ contract GrapeGenesisRewardPool {
             }
         }
         bool _isStarted = (_lastRewardTime <= poolStartTime) || (_lastRewardTime <= block.timestamp);
-        poolInfo.push(PoolInfo({token: _token, allocPoint: _allocPoint, lastRewardTime: _lastRewardTime, accGrapePerShare: 0, isStarted: _isStarted}));
+        poolInfo.push(PoolInfo({token: _token, allocPoint: _allocPoint, lastRewardTime: _lastRewardTime, accKeenPerShare: 0, isStarted: _isStarted}));
         if (_isStarted) {
             totalAllocPoint = totalAllocPoint.add(_allocPoint);
         }
     }
 
-    // Update the given pool's GRAPE allocation point. Can only be called by the owner.
+    // Update the given pool's KEEN allocation point. Can only be called by the owner.
     function set(uint256 _pid, uint256 _allocPoint) public onlyOperator {
         massUpdatePools();
         PoolInfo storage pool = poolInfo[_pid];
@@ -134,35 +128,45 @@ contract GrapeGenesisRewardPool {
         pool.allocPoint = _allocPoint;
     }
 
-    // Return accumulate rewards over the given _from to _to block.
+    // Return accumulate rewards over the given _fromTime to _toTime.
     function getGeneratedReward(uint256 _fromTime, uint256 _toTime) public view returns (uint256) {
-        if (_fromTime >= _toTime) return 0;
-        if (_toTime >= poolEndTime) {
-            if (_fromTime >= poolEndTime) return 0;
-            if (_fromTime <= poolStartTime) return poolEndTime.sub(poolStartTime).mul(grapePerSecond);
-            return poolEndTime.sub(_fromTime).mul(grapePerSecond);
-        } else {
-            if (_toTime <= poolStartTime) return 0;
-            if (_fromTime <= poolStartTime) return _toTime.sub(poolStartTime).mul(grapePerSecond);
-            return _toTime.sub(_fromTime).mul(grapePerSecond);
+        for (uint8 epochId = 2; epochId >= 1; --epochId) {
+            if (_toTime >= epochEndTimes[epochId - 1]) {
+                if (_fromTime >= epochEndTimes[epochId - 1]) {
+                    return _toTime.sub(_fromTime).mul(epochKeenPerSecond[epochId]);
+                }
+
+                uint256 _generatedReward = _toTime.sub(epochEndTimes[epochId - 1]).mul(epochKeenPerSecond[epochId]);
+                if (epochId == 1) {
+                    return _generatedReward.add(epochEndTimes[0].sub(_fromTime).mul(epochKeenPerSecond[0]));
+                }
+                for (epochId = epochId - 1; epochId >= 1; --epochId) {
+                    if (_fromTime >= epochEndTimes[epochId - 1]) {
+                        return _generatedReward.add(epochEndTimes[epochId].sub(_fromTime).mul(epochKeenPerSecond[epochId]));
+                    }
+                    _generatedReward = _generatedReward.add(epochEndTimes[epochId].sub(epochEndTimes[epochId - 1]).mul(epochKeenPerSecond[epochId]));
+                }
+                return _generatedReward.add(epochEndTimes[0].sub(_fromTime).mul(epochKeenPerSecond[0]));
+            }
         }
+        return _toTime.sub(_fromTime).mul(epochKeenPerSecond[0]);
     }
 
-    // View function to see pending GRAPE on frontend.
-    function pendingGRAPE(uint256 _pid, address _user) external view returns (uint256) {
+    // View function to see pending KEENs on frontend.
+    function pendingKEEN(uint256 _pid, address _user) external view returns (uint256) {
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_user];
-        uint256 accGrapePerShare = pool.accGrapePerShare;
+        uint256 accKeenPerShare = pool.accKeenPerShare;
         uint256 tokenSupply = pool.token.balanceOf(address(this));
         if (block.timestamp > pool.lastRewardTime && tokenSupply != 0) {
             uint256 _generatedReward = getGeneratedReward(pool.lastRewardTime, block.timestamp);
-            uint256 _grapeReward = _generatedReward.mul(pool.allocPoint).div(totalAllocPoint);
-            accGrapePerShare = accGrapePerShare.add(_grapeReward.mul(1e18).div(tokenSupply));
+            uint256 _keenReward = _generatedReward.mul(pool.allocPoint).div(totalAllocPoint);
+            accKeenPerShare = accKeenPerShare.add(_keenReward.mul(1e18).div(tokenSupply));
         }
-        return user.amount.mul(accGrapePerShare).div(1e18).sub(user.rewardDebt);
+        return user.amount.mul(accKeenPerShare).div(1e18).sub(user.rewardDebt);
     }
 
-    // Update reward variables for all pools. Be careful of gas spending!
+    // Update reward variables for all pools. Expensive!
     function massUpdatePools() public {
         uint256 length = poolInfo.length;
         for (uint256 pid = 0; pid < length; ++pid) {
@@ -187,8 +191,8 @@ contract GrapeGenesisRewardPool {
         }
         if (totalAllocPoint > 0) {
             uint256 _generatedReward = getGeneratedReward(pool.lastRewardTime, block.timestamp);
-            uint256 _grapeReward = _generatedReward.mul(pool.allocPoint).div(totalAllocPoint);
-            pool.accGrapePerShare = pool.accGrapePerShare.add(_grapeReward.mul(1e18).div(tokenSupply));
+            uint256 _keenReward = _generatedReward.mul(pool.allocPoint).div(totalAllocPoint);
+            pool.accKeenPerShare = pool.accKeenPerShare.add(_keenReward.mul(1e18).div(tokenSupply));
         }
         pool.lastRewardTime = block.timestamp;
     }
@@ -200,21 +204,17 @@ contract GrapeGenesisRewardPool {
         UserInfo storage user = userInfo[_pid][_sender];
         updatePool(_pid);
         if (user.amount > 0) {
-            uint256 _pending = user.amount.mul(pool.accGrapePerShare).div(1e18).sub(user.rewardDebt);
+            uint256 _pending = user.amount.mul(pool.accKeenPerShare).div(1e18).sub(user.rewardDebt);
             if (_pending > 0) {
-                safeGrapeTransfer(_sender, _pending);
+                safeKeenTransfer(_sender, _pending);
                 emit RewardPaid(_sender, _pending);
             }
         }
         if (_amount > 0) {
             pool.token.safeTransferFrom(_sender, address(this), _amount);
-            if (address(pool.token) == mim) {
-                user.amount = user.amount.add(_amount.mul(9900).div(10000));
-            } else {
-                user.amount = user.amount.add(_amount);
-            }
+            user.amount = user.amount.add(_amount);
         }
-        user.rewardDebt = user.amount.mul(pool.accGrapePerShare).div(1e18);
+        user.rewardDebt = user.amount.mul(pool.accKeenPerShare).div(1e18);
         emit Deposit(_sender, _pid, _amount);
     }
 
@@ -225,16 +225,16 @@ contract GrapeGenesisRewardPool {
         UserInfo storage user = userInfo[_pid][_sender];
         require(user.amount >= _amount, "withdraw: not good");
         updatePool(_pid);
-        uint256 _pending = user.amount.mul(pool.accGrapePerShare).div(1e18).sub(user.rewardDebt);
+        uint256 _pending = user.amount.mul(pool.accKeenPerShare).div(1e18).sub(user.rewardDebt);
         if (_pending > 0) {
-            safeGrapeTransfer(_sender, _pending);
+            safeKeenTransfer(_sender, _pending);
             emit RewardPaid(_sender, _pending);
         }
         if (_amount > 0) {
             user.amount = user.amount.sub(_amount);
             pool.token.safeTransfer(_sender, _amount);
         }
-        user.rewardDebt = user.amount.mul(pool.accGrapePerShare).div(1e18);
+        user.rewardDebt = user.amount.mul(pool.accKeenPerShare).div(1e18);
         emit Withdraw(_sender, _pid, _amount);
     }
 
@@ -249,14 +249,14 @@ contract GrapeGenesisRewardPool {
         emit EmergencyWithdraw(msg.sender, _pid, _amount);
     }
 
-    // Safe GRAPE transfer function, just in case a rounding error causes pool to not have enough GRAPEs.
-    function safeGrapeTransfer(address _to, uint256 _amount) internal {
-        uint256 _grapeBalance = grape.balanceOf(address(this));
-        if (_grapeBalance > 0) {
-            if (_amount > _grapeBalance) {
-                grape.safeTransfer(_to, _grapeBalance);
+    // Safe keen transfer function, just in case if rounding error causes pool to not have enough Keen.
+    function safeKeenTransfer(address _to, uint256 _amount) internal {
+        uint256 _keenBal = keen.balanceOf(address(this));
+        if (_keenBal > 0) {
+            if (_amount > _keenBal) {
+                keen.safeTransfer(_to, _keenBal);
             } else {
-                grape.safeTransfer(_to, _amount);
+                keen.safeTransfer(_to, _amount);
             }
         }
     }
@@ -270,13 +270,13 @@ contract GrapeGenesisRewardPool {
         uint256 amount,
         address to
     ) external onlyOperator {
-        if (block.timestamp < poolEndTime + 90 days) {
-            // do not allow to drain core token (GRAPE or lps) if less than 90 days after pool ends
-            require(_token != grape, "grape");
+        if (block.timestamp < epochEndTimes[1] + 30 days) {
+            // do not allow to drain token if less than 30 days after farming
+            require(_token != keen, "!keen");
             uint256 length = poolInfo.length;
             for (uint256 pid = 0; pid < length; ++pid) {
                 PoolInfo storage pool = poolInfo[pid];
-                require(_token != pool.token, "pool.token");
+                require(_token != pool.token, "!pool.token");
             }
         }
         _token.safeTransfer(to, amount);

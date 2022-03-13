@@ -2,27 +2,15 @@
 
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20Burnable.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 
 import "./owner/Operator.sol";
 
-/*
-
- ██████╗ ██████╗  █████╗ ██████╗ ███████╗    ███████╗██╗███╗   ██╗ █████╗ ███╗   ██╗ ██████╗███████╗
-██╔════╝ ██╔══██╗██╔══██╗██╔══██╗██╔════╝    ██╔════╝██║████╗  ██║██╔══██╗████╗  ██║██╔════╝██╔════╝
-██║  ███╗██████╔╝███████║██████╔╝█████╗      █████╗  ██║██╔██╗ ██║███████║██╔██╗ ██║██║     █████╗  
-██║   ██║██╔══██╗██╔══██║██╔═══╝ ██╔══╝      ██╔══╝  ██║██║╚██╗██║██╔══██║██║╚██╗██║██║     ██╔══╝  
-╚██████╔╝██║  ██║██║  ██║██║     ███████╗    ██║     ██║██║ ╚████║██║  ██║██║ ╚████║╚██████╗███████╗
- ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚══════╝    ╚═╝     ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝╚══════╝
-                                                                                                    
-*/
-
-
-contract GBond is ERC20Burnable, Operator {
+contract iBKEEN is ERC20Burnable, Operator {
     /**
-     * @notice Constructs the GRAPE Bond ERC-20 contract.
+     * @notice Constructs the iKeen Bond ERC-20 contract.
      */
-    constructor() public ERC20("GBOND", "GBOND") {}
+    constructor() ERC20("iBKEEN Bonds", "iBKEEN") {}
 
     /**
      * @notice Operator mints grape bonds to a recipient
