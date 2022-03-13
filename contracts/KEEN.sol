@@ -18,7 +18,7 @@ contract KEEN is ERC20Burnable, Operator {
     // Initial distribution for the day 2-5 KEEN-WETH LP -> KEEN pool
     uint256 public constant INITIAL_KEEN_POOL_DISTRIBUTION = 21600 ether;
     // Distribution for airdrops wallet
-    uint256 public constant INITIAL_AIRDROP_WALLET_DISTRIBUTION = 1000 ether;
+    uint256 public constant INITIAL_AIRDROP_WALLET_DISTRIBUTION = 0 ether;
 
     // Have the rewards been distributed to the pools
     bool public rewardPoolDistributed = false;
