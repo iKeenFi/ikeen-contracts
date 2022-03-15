@@ -310,7 +310,7 @@ contract iKeenPreSale is Ownable {
     return saleStarted;
   }
 
-  function purchaseaKarma(uint256 _val, address _user)
+  function purchaseaISKEEN(uint256 _val, address _user)
     external
     payable
     returns (bool)
