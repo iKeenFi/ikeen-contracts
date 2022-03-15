@@ -237,13 +237,13 @@ interface Imim {
   function deposit() external payable;
 }
 
-contract KARMAPreSale is Ownable {
+contract iKeenPreSale is Ownable {
   using SafeMath for uint256;
   using SafeERC20 for IERC20;
 
-  address public alphaKARMA;
+  address public alphaISKEEN;
   address public DAOAddress;
-  address public mim;
+  address public mim; // ADD USDC USDC.E ...
 
   uint256 public minAmount;
   uint256 public maxAmount;
@@ -256,7 +256,7 @@ contract KARMAPreSale is Ownable {
 
   bool public saleStarted;
 
-  mapping(address => bool) public boughtKarma;
+  mapping(address => bool) public boughtISKEEN;
   mapping(address => bool) public whiteListed;
 
   function whiteListBuyers(address[] memory _buyers)
@@ -337,7 +337,7 @@ contract KARMAPreSale is Ownable {
 
     IERC20(mim).safeTransferFrom(msg.sender, DAOAddress, _val);
     uint256 _purchaseAmount = _calculateSaleQuote(_val);
-    IERC20(alphaKARMA).safeTransfer(msg.sender, _purchaseAmount);
+    IERC20(alphaISKEEN).safeTransfer(msg.sender, _purchaseAmount);
     return true;
   }
 
