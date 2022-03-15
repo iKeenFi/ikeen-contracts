@@ -294,7 +294,7 @@ contract Divine is Ownable, ERC20 {
 }
 
 contract AlphaKARMA is Divine {
-    constructor() Divine("Alpha KARMA", "alphaKARMA", 9) {
+    constructor() Divine("Alpha ISKEEN", "alphaISKEEN", 9) {
         _mint(_owner, 30000 * 1e9);
     }
 
