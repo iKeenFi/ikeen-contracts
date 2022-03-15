@@ -328,7 +328,7 @@ library SafeMath {
     }
 }
 
-contract aKarmaMigration is Ownable {
+contract aISKEENMigration is Ownable {
     using SafeMath for uint256;
 
     uint256 public endTimestamp;
@@ -336,8 +336,8 @@ contract aKarmaMigration is Ownable {
 
     uint256 public maxAmt;
 
-    IERC20 public Karma;
-    IERC20 public aKarma;
+    IERC20 public ISKEEN;
+    IERC20 public aISKEEN;
 
     bool public isInitialized;
 
@@ -359,8 +359,8 @@ contract aKarmaMigration is Ownable {
         uint256 _startTimestamp,
         uint256 _endTimestamp
     ) public onlyOwner() notInitialized() {
-        Karma = IERC20(_COIN);
-        aKarma = IERC20(_aCOIN);
+        ISKEEN = IERC20(_COIN);
+        aISKEEN = IERC20(_aCOIN);
         startTimestamp = _startTimestamp;
         endTimestamp = _endTimestamp;
         isInitialized = true;
@@ -368,21 +368,21 @@ contract aKarmaMigration is Ownable {
     }
 
     function migrate() external onlyInitialized() {
-        uint256 amount = aKarma.balanceOf(msg.sender);
+        uint256 amount = aISKEEN.balanceOf(msg.sender);
         require(amount <= maxAmt,"Exceed the specified amount");
         require(startTimestamp < block.timestamp,"Not started yet");
-        require(block.timestamp < endTimestamp, "swapping of aKarma has ended");
+        require(block.timestamp < endTimestamp, "swapping of aISKEEN has ended");
 
-        aKarma.transferFrom(msg.sender, address(this), amount);
+        aISKEEN.transferFrom(msg.sender, address(this), amount);
         senderInfo[msg.sender] = senderInfo[msg.sender].add(amount);
-        Karma.transfer(msg.sender, amount);
+        ISKEEN.transfer(msg.sender, amount);
     }
 
     function reclaim() external {
-        require(senderInfo[msg.sender] > 0, "user has no aKarma to withdraw");
+        require(senderInfo[msg.sender] > 0, "user has no aISKEEN to withdraw");
         require(
             block.timestamp > endTimestamp,
-            "aKarma swap is still ongoing"
+            "aISKEEN swap is still ongoing"
         );
 
         uint256 amount = senderInfo[msg.sender];
@@ -391,8 +391,8 @@ contract aKarmaMigration is Ownable {
     }
 
     function withdraw() external onlyOwner() {
-        require(block.timestamp > endTimestamp, "swapping of aKarma has not ended");
-        uint256 amount = Karma.balanceOf(address(this));
+        require(block.timestamp > endTimestamp, "swapping of aISKEEN has not ended");
+        uint256 amount = ISKEEN.balanceOf(address(this));
 
         Karma.transfer(msg.sender, amount);
     }
