@@ -323,7 +323,7 @@ contract iKeenPreSale is Ownable {
       "The amount entered exceeds Fundraise Goal"
     );
     require(saleStarted == true, "Not started");
-    require(boughtKarma[_user] == false, "Already participated");
+    require(boughtISKEEN[_user] == false, "Already participated");
     require(startTimestamp < block.timestamp, "Not started yet");
 
     boughtKarma[_user] = true;
