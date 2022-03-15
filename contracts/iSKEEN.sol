@@ -17,7 +17,7 @@ contract iSKEEN is ERC20Burnable, Operator {
     // DAO allocation
     uint256 public constant COMMUNITY_FUND_POOL_ALLOCATION = 10000 ether;
 
-    // Devs get PAIDDD
+    // Devs get PAIDD and part of this shares will be dedicated to marketing
     uint256 public constant DEV_FUND_POOL_ALLOCATION = 30000 ether;
 
     uint256 public constant VESTING_DURATION = 300 days;
