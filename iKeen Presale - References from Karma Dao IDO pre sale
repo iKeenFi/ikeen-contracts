@@ -272,7 +272,7 @@ contract iKeenPreSale is Ownable {
 
   function initialize(
     address _DAOAddress,
-    address _alphaKARMA,
+    address _alphaISKEEN,
     address _mim,
     uint256 _minAmount,
     uint256 _maxAmount,
@@ -282,7 +282,7 @@ contract iKeenPreSale is Ownable {
     uint256 _endTimestamp,
     uint256 _remainingPurchasesMaxAmt
   ) external onlyOwner returns (bool) {
-    alphaKARMA = _alphaKARMA;
+    alphaISKEEN = _alphaISKEEN;
 
     mim = _mim;
 
@@ -315,7 +315,7 @@ contract iKeenPreSale is Ownable {
     payable
     returns (bool)
   {
-    require(_val >= minAmount, "Below minimum allocation");
+    require(_val >= minAmount, "Below minimum allocation"); 
     require(_val <= maxAmount, "More than allocation");
     sellAmount = sellAmount.add(_val);
     require(
@@ -326,7 +326,7 @@ contract iKeenPreSale is Ownable {
     require(boughtISKEEN[_user] == false, "Already participated");
     require(startTimestamp < block.timestamp, "Not started yet");
 
-    boughtKarma[_user] = true;
+    boughtISKEEN[_user] = true;
 
     if (endTimestamp < block.timestamp) {
       require(_val <= remainingPurchasesMaxAmt, "Exceeded IDO limit");
