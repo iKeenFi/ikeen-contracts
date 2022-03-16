@@ -20,6 +20,9 @@ contract iSKEEN is ERC20Burnable, Operator {
     // Devs get PAIDDD
     uint256 public constant DEV_FUND_POOL_ALLOCATION = 30000 ether;
 
+    // ICO
+    uint256 public constant ICO_ALLOCATION = 10000 ether;
+
     uint256 public constant VESTING_DURATION = 300 days;
     uint256 public startTime;
     uint256 public endTime;
@@ -29,13 +32,14 @@ contract iSKEEN is ERC20Burnable, Operator {
 
     address public communityFund;
     address public devFund;
+    address public ico;
 
     uint256 public communityFundLastClaimed;
     uint256 public devFundLastClaimed;
 
     bool public rewardPoolDistributed = false;
 
-    constructor(uint256 _startTime, address _communityFund, address _devFund) public ERC20("iSKEEN Shares", "iSKEEN") {
+    constructor(uint256 _startTime, address _communityFund, address _devFund, address _ico) ERC20("iSKEEN Shares", "iSKEEN") {
         _mint(msg.sender, 1 ether); // mint 1 iSKEEN for initial pools deployment
 
         startTime = _startTime;
@@ -52,6 +56,12 @@ contract iSKEEN is ERC20Burnable, Operator {
 
         require(_communityFund != address(0), "Address cannot be 0");
         communityFund = _communityFund;
+
+        // do not do 0 checking, because some projects forking off us may not want an ICO
+        ico = _ico;
+
+        // automatically mint iSKEEN and put it into the ICO contract
+        _mint(_ico, ICO_ALLOCATION);
     }
 
     function setTreasuryFund(address _communityFund) external {
