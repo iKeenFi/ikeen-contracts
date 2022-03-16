@@ -12,18 +12,19 @@ contract iSKEEN is ERC20Burnable, Operator {
 
     // TOTAL MAX SUPPLY = 100,000 iSKEEN
 
-    uint256 public constant FARMING_POOL_REWARD_ALLOCATION = 50000 ether;
+    uint256 public constant FARMING_POOL_REWARD_ALLOCATION = 60000 ether;
 
     // DAO allocation
-    uint256 public constant COMMUNITY_FUND_POOL_ALLOCATION = 10000 ether;
+    uint256 public constant COMMUNITY_FUND_POOL_ALLOCATION = 15000 ether;
 
-    // Devs get PAIDDD
-    uint256 public constant DEV_FUND_POOL_ALLOCATION = 30000 ether;
+    // Devs get PAID 
+    uint256 public constant DEV_FUND_POOL_ALLOCATION = 15000 ether;
 
     // ICO
     uint256 public constant ICO_ALLOCATION = 10000 ether;
 
-    uint256 public constant VESTING_DURATION = 300 days;
+    uint256 public constant VESTING_DURATION = 150 days;
+    
     uint256 public startTime;
     uint256 public endTime;
 
