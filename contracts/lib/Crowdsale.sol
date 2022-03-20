@@ -193,7 +193,7 @@ contract ERC20Crowdsale is Context, ReentrancyGuard {
      * @dev Determines how ETH is stored/forwarded on purchases.
      */
     function _forwardFunds() internal {
-        uint256 balance = _tokenSold.balanceOf(address(this));
-        _tokenSold.transfer(_wallet, balance);
+        uint256 balance = _tokenPayment.balanceOf(address(this));
+        _tokenPayment.transfer(_wallet, balance);
     }
 }
