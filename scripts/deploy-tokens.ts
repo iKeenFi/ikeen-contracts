@@ -5,6 +5,9 @@
 // Runtime Environment's members available in the global scope.
 import { ethers } from "hardhat";
 
+// in UTC timestamp
+const START_TIME = Math.floor(Date.now() / 1000);
+
 async function main() {
   // Hardhat always runs the compile task when running scripts with its command
   // line interface.
@@ -14,12 +17,26 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  const Greeter = await ethers.getContractFactory("Greeter");
-  const greeter = await Greeter.deploy("Hello, Hardhat!");
+  const KEEN = await ethers.getContractFactory("KEEN");
+  const iSKEEN = await ethers.getContractFactory("iSKEEN");
+  const iBKEEN = await ethers.getContractFactory("iBKEEN");
 
-  await greeter.deployed();
+  // Deploy KEEN first
+  //const keen = await KEEN.deploy();
 
-  console.log("Greeter deployed to:", greeter.address);
+  // Deploy iSKEEN then
+  const iskeen = await iSKEEN.deploy(
+    START_TIME,
+    "0x94500E9d54E092B32bA89156805672b9aAe6ab43",
+    "0x94500E9d54E092B32bA89156805672b9aAe6ab43"
+  );
+
+  // Deploy iBKEEN
+  const ibkeen = await iBKEEN.deploy();
+
+  //console.log("KEEN: " + keen.address);
+  console.log("iSKEEN: " + iskeen.address);
+  console.log("iBKEEN: " + ibkeen.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

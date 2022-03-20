@@ -10,20 +10,20 @@ import "./owner/Operator.sol";
 contract iSKEEN is ERC20Burnable, Operator {
     using SafeMath for uint256;
 
-    // TOTAL MAX SUPPLY = 100,000 iSKEEN
+    // TOTAL SUPPLY = 100,000 iSKEEN (and a couple more that can be minted by operator)
 
     uint256 public constant FARMING_POOL_REWARD_ALLOCATION = 50000 ether;
 
     // DAO allocation
     uint256 public constant COMMUNITY_FUND_POOL_ALLOCATION = 10000 ether;
 
-    // Devs get PAID 
+    // Devs get paid 
     uint256 public constant DEV_FUND_POOL_ALLOCATION = 30000 ether;
 
     // ICO
     uint256 public constant ICO_ALLOCATION = 10000 ether;
 
-    uint256 public constant VESTING_DURATION = 350 days;
+    uint256 public constant VESTING_DURATION = 365 days;
     
     uint256 public startTime;
     uint256 public endTime;
@@ -40,7 +40,7 @@ contract iSKEEN is ERC20Burnable, Operator {
 
     bool public rewardPoolDistributed = false;
 
-    constructor(uint256 _startTime, address _communityFund, address _devFund, address _ico) ERC20("iSKEEN Shares", "iSKEEN") {
+    constructor(uint256 _startTime, address _communityFund, address _devFund) ERC20("iSKEEN Shares", "iSKEEN") {
         _mint(msg.sender, 1 ether); // mint 1 iSKEEN for initial pools deployment
 
         startTime = _startTime;
@@ -58,11 +58,8 @@ contract iSKEEN is ERC20Burnable, Operator {
         require(_communityFund != address(0), "Address cannot be 0");
         communityFund = _communityFund;
 
-        // do not do 0 checking, because some projects forking off us may not want an ICO
-        ico = _ico;
-
-        // automatically mint iSKEEN and put it into the ICO contract
-        _mint(_ico, ICO_ALLOCATION);
+        // zero until set
+        ico = address(0);
     }
 
     function setTreasuryFund(address _communityFund) external {
@@ -74,6 +71,16 @@ contract iSKEEN is ERC20Burnable, Operator {
         require(msg.sender == devFund, "!dev");
         require(_devFund != address(0), "zero");
         devFund = _devFund;
+    }
+
+    function setICO(address _ico) external onlyOperator {
+        // do not do 0 checking, because some projects forking off us may not want an ICO
+        ico = _ico;
+
+        // automatically mint iSKEEN and put it into the ICO contract
+        _mint(_ico, ICO_ALLOCATION);
+
+        ico = _ico;
     }
 
     function unclaimedTreasuryFund() public view returns (uint256 _pending) {

@@ -44,3 +44,13 @@ npx hardhat verify --network ropsten DEPLOYED_CONTRACT_ADDRESS "Hello, Hardhat!"
 # Performance optimizations
 
 For faster runs of your tests and scripts, consider skipping ts-node's type checking by setting the environment variable `TS_NODE_TRANSPILE_ONLY` to `1` in hardhat's environment. For more details see [the documentation](https://hardhat.org/guides/typescript.html#performance-optimizations).
+
+### how to deploy
+
+(note: UniswapV2Library has an initcode hash inside it, change it to your router's one)
+
+1. run the deploy-tokens script
+2. go onto the traderjoe website and create 2 LPs: one for iSKEEN and one for KEEN
+3. replace KEEN_LP in deploy-treasury.ts with the LP address, as well as all the variables (KEEN_ADDRESS, ISKEEN_ADDRESS, BOND_ADDRESS, etc.)
+4. run deploy-treasury script
+5. run deploy-pools script

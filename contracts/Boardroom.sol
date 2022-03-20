@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
 import "./utils/ContractGuard.sol";
 import "./interfaces/IBasisAsset.sol";
@@ -127,8 +128,8 @@ contract Boardroom is ShareWrapper, ContractGuard {
         BoardroomSnapshot memory genesisSnapshot = BoardroomSnapshot({time: block.number, rewardReceived: 0, rewardPerShare: 0});
         boardroomHistory.push(genesisSnapshot);
 
-        withdrawLockupEpochs = 6; // Lock for 6 epochs (36h) before release withdraw
-        rewardLockupEpochs = 3; // Lock for 3 epochs (18h) before release claimReward
+        withdrawLockupEpochs = 4; // Lock for 4 epochs (24h) before release withdraw
+        rewardLockupEpochs = 1; // Lock for 1 epoch (6h) before release claimReward
 
         initialized = true;
         operator = msg.sender;

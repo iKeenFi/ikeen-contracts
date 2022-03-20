@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
+// wont be deployed
 // Note that this pool has no minter key of KEEN (rewards).
 // Instead, the governance will call KEEN distributeReward method and send reward to this pool at the beginning.
 contract KeenRewardPool {

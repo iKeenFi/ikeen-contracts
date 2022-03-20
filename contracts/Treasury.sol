@@ -246,7 +246,7 @@ contract Treasury is ContractGuard {
         boardroom = _boardroom;
         startTime = _startTime;
 
-        keenPriceOne = 10**18; // This is to allow a PEG of 1 GRAPE per MIM
+        keenPriceOne = 10**18; // This is to allow a PEG of 1 KEEN per AVAX
         keenPriceCeiling = keenPriceOne.mul(101).div(100);
 
         // Dynamic max expansion percent

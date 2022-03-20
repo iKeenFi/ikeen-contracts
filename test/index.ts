@@ -1,19 +1,51 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-describe("Greeter", function () {
-  it("Should return the new greeting once it's changed", async function () {
-    const Greeter = await ethers.getContractFactory("Greeter");
-    const greeter = await Greeter.deploy("Hello, world!");
-    await greeter.deployed();
+describe("ICO", function () {
+  it("Should return 0.1 iSKEEN per 1 USDC", async function () {
+    let [operator, addr2] = await ethers.getSigners();
 
-    expect(await greeter.greet()).to.equal("Hello, world!");
+    const ICO = await ethers.getContractFactory("ICOv2");
+    const ExampleToken = await ethers.getContractFactory("ExampleToken");
 
-    const setGreetingTx = await greeter.setGreeting("Hola, mundo!");
+    const exampletoken = await ExampleToken.deploy();
+    await exampletoken.deployed();
 
-    // wait until the transaction is mined
-    await setGreetingTx.wait();
+    const paymenttoken = await ExampleToken.deploy();
+    await paymenttoken.deployed();
 
-    expect(await greeter.greet()).to.equal("Hola, mundo!");
+    const ico = await ICO.deploy(
+      exampletoken.address,
+      paymenttoken.address,
+      10000000
+    );
+    await ico.deployed();
+
+    // mint me some and mint it some
+    await paymenttoken.mint(operator.address, ethers.BigNumber.from("1000000"));
+    // just give it everything it needs and way more
+    await exampletoken.mint(
+      ico.address,
+      ethers.BigNumber.from("10000000000000000000000000000000")
+    );
+
+    // approval
+    let approvetx = await paymenttoken.approve(
+      ico.address,
+      ethers.BigNumber.from(
+        "115792089237316195423570985008687907853269984665640564039457584007913129639935"
+      )
+    );
+    await approvetx.wait();
+
+    // swap time, bring in 1 "USDC" and hopefully get 0.1 "iSKEEN"
+    let buytx = await ico.buy("1000000");
+    await buytx.wait();
+
+    expect(await paymenttoken.balanceOf(operator.address)).to.equal("0");
+    console.log("got here");
+    expect(await exampletoken.balanceOf(operator.address)).to.equal(
+      "100000000000000000"
+    );
   });
 });

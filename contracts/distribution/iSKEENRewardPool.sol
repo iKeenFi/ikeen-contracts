@@ -49,7 +49,7 @@ contract iSKEENRewardPool {
 
     uint256 public iSKEENPerSecond = 0.001585 ether; // 50000 iSKEEN / (365 days * 24h * 60min * 60s)
     uint256 public runningTime = 365 days; // 365 days
-    uint256 public constant TOTAL_REWARDS = 50000 ether; //why only 50 k if we decreased our dev payment , we add 10 k more to this amount 
+    uint256 public constant TOTAL_REWARDS = 50000 ether; 
 
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
     event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
