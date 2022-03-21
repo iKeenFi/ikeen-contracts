@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-
+import "../lib/IWhitelist.sol";
 
 // Note that this pool has no minter key of KEEN (rewards).
 // Instead, the governance will call KEEN distributeReward method and send reward to this pool at the beginning.
@@ -32,7 +32,7 @@ contract KeenGenesisRewardPool {
     }
 
     IERC20 public keen;
-    address public avax;
+    IERC721 public whitelist;
 
     // Info of each pool.
     PoolInfo[] public poolInfo;
@@ -49,16 +49,23 @@ contract KeenGenesisRewardPool {
     // The time when KEEN mining ends.
     uint256 public poolEndTime;
 
+    modifier isWhitelisted() {
+        if (address(whitelist) != address(0)) {
+            require(whitelist.balanceOf(msg.sender) >= 1, "Not whitelisted for genesis pool");  
+        }
+        _;
+    }
+
     // TESTNET
-    uint256 public keenPerSecond = 0.66667 ether; // 2400 KEEN / (1h * 60min * 60s)
-    uint256 public runningTime = 1 hours; // 1 hours
-    uint256 public constant TOTAL_REWARDS = 2400 ether;
+    //uint256 public keenPerSecond = 0.017361111 ether; // 2000 KEEN / (1h * 60min * 60s)
+    //uint256 public runningTime = 1 hours; // 1 hours
+    //uint256 public constant TOTAL_REWARDS = 3000 ether;
     // END TESTNET
 
     // MAINNET
-    //uint256 public keenPerSecond = 0.02777 ether; // 2400 KEEN / (24h * 60min * 60s)
-    //uint256 public runningTime = 1 days; // 1 days
-    //uint256 public constant TOTAL_REWARDS = 2400 ether;
+    uint256 public keenPerSecond = 0.017361111 ether; // 2000 KEEN / (48h * 60min * 60s)
+    uint256 public runningTime = 2 days; // 2 days
+    uint256 public constant TOTAL_REWARDS = 3000 ether;
     // END MAINNET
 
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
@@ -68,12 +75,12 @@ contract KeenGenesisRewardPool {
 
     constructor(
         address _keen,
-        address _avax,
+        address _whitelist,
         uint256 _poolStartTime
-    ) public {
+    ) {
         require(block.timestamp < _poolStartTime, "late");
         if (_keen != address(0)) keen = IERC20(_keen);
-        if (_avax != address(0)) avax = _avax;
+        if (_whitelist != address(0)) whitelist = IERC721(_whitelist);
         poolStartTime = _poolStartTime;
         poolEndTime = poolStartTime + runningTime;
         operator = msg.sender;
@@ -194,7 +201,7 @@ contract KeenGenesisRewardPool {
     }
 
     // Deposit LP tokens.
-    function deposit(uint256 _pid, uint256 _amount) public {
+    function deposit(uint256 _pid, uint256 _amount) public isWhitelisted {
         address _sender = msg.sender;
         PoolInfo storage pool = poolInfo[_pid];
         UserInfo storage user = userInfo[_pid][_sender];
@@ -208,11 +215,7 @@ contract KeenGenesisRewardPool {
         }
         if (_amount > 0) {
             pool.token.safeTransferFrom(_sender, address(this), _amount);
-            if (address(pool.token) == avax) {
-                user.amount = user.amount.add(_amount.mul(9900).div(10000));
-            } else {
-                user.amount = user.amount.add(_amount);
-            }
+            user.amount = user.amount.add(_amount);
         }
         user.rewardDebt = user.amount.mul(pool.accKeenPerShare).div(1e18);
         emit Deposit(_sender, _pid, _amount);
@@ -270,8 +273,8 @@ contract KeenGenesisRewardPool {
         uint256 amount,
         address to
     ) external onlyOperator {
-        if (block.timestamp < poolEndTime + 90 days) {
-            // do not allow to drain core token (KEEN or lps) if less than 90 days after pool ends
+        if (block.timestamp < poolEndTime + 30 days) {
+            // do not allow to drain core token (KEEN or lps) if less than 30 days after pool ends
             require(_token != keen, "keen");
             uint256 length = poolInfo.length;
             for (uint256 pid = 0; pid < length; ++pid) {
