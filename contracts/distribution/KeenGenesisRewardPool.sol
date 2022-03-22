@@ -99,6 +99,21 @@ contract KeenGenesisRewardPool {
     }
 
     // Add a new token to the pool. Can only be called by the owner.
+    // APPPARENTLY FOR SOME STUPID REASON,
+    // THE ORIGINAL DEVELOPER NAMED THE
+    // _lastRewardTime VARIABLE SO BADLY
+    // THAT IT CONFUSES US INTO THINKING IT'S
+    // WHAT IT MEANS IN NORMAL ENGLISH.
+    // BUT NOOOO, LAST REWARD TIME APPARENTLY
+    // DOESN'T MEAN THE END TIME, BUT IT MEANS
+    // THE START TIME OF REWARDS??
+    // DON'T LULL US INTO A FALSE SENSE
+    // OF SECURITY. YOU COULD'VE AT LEAST
+    // WRITTEN LIKE "x" WHICH WOULD HAVE
+    // CONFUSED US BUT WOULD'VE GIVEN US A
+    // HINT TO CHECK THE CODE.
+    // Excuse the rant,
+    // cybertelx
     function add(
         uint256 _allocPoint,
         IERC20 _token,

@@ -10,12 +10,13 @@ const WHITELIST_ADDRESS = "0x463791E15CcAe33de02C2B247aa75E8d4c2d9980";
 // length of epoch, in seconds
 const PERIOD_LENGTH = 6 * 60 * 60;
 
-// in UTC timestamp. 2022-3-22 10:00:00 PM UTC
+// in UTC timestamp. 2022-3-24 8:00:00 PM UTC
 // pool start time.
 const START_TIME = 1647979200;
 
-// 2022-3-24 12:00:00 PM UTC
-const END_TIME = 1648123200;
+// a while
+// next year
+const END_TIME = 1679688000;
 
 // We require the Hardhat Runtime Environment explicitly here. This is optional
 // but useful for running the script in a standalone fashion through `node <script>`.
@@ -34,7 +35,7 @@ async function main() {
 
   // We get the contract to deploy
   const Genesis = await ethers.getContractFactory("KeenGenesisRewardPool");
-  /*let genesis = await Genesis.deploy(
+  let genesis = await Genesis.deploy(
     KEEN_ADDRESS,
     WHITELIST_ADDRESS,
     START_TIME
@@ -42,28 +43,18 @@ async function main() {
   await genesis.deployed();
 
   console.log("Genesis pool launched: " + genesis.address);
-  console.log("Adding tokens...");*/
+  console.log("Adding tokens...");
 
-  let genesis = Genesis.attach("0x36a8afa8e4298162c099f1d211d7bd8a6facd724");
-
-  // nullify old pools
-  /*await genesis.set(0, 0);
-  await genesis.set(1, 0);
-  await genesis.set(2, 0);
-  console.log("nullified");
-
-  await genesis.set(3, 0);*/
-
-  let iskeenAvaxTx = await genesis.add(45, iSKEEN_AVAX_LP, false, START_TIME);
+  let iskeenAvaxTx = await genesis.add(45, iSKEEN_AVAX_LP, false, END_TIME);
   console.log("added ISKEEN-AVAX: " + iskeenAvaxTx.hash);
 
-  let wavaxTx = await genesis.add(30, WAVAX_ADDRESS, false, START_TIME);
+  let wavaxTx = await genesis.add(30, WAVAX_ADDRESS, false, END_TIME);
   console.log("added WAVAX: " + wavaxTx.hash);
 
-  let usdcTx = await genesis.add(10, MIM_ADDRESS, false, START_TIME);
+  let usdcTx = await genesis.add(10, MIM_ADDRESS, false, END_TIME);
   console.log("added MIM: " + usdcTx.hash);
 
-  let grapeTx = await genesis.add(15, GRAPE_ADDRESS, true, START_TIME);
+  let grapeTx = await genesis.add(15, GRAPE_ADDRESS, true, END_TIME);
   console.log("added GRAPE: " + grapeTx.hash);
 
   console.log("ALL DONE! ALL ENGINES FIRE!");
