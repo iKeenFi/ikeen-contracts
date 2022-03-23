@@ -43,6 +43,15 @@ const config: HardhatUserConfig = {
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
+    hardhat: {
+      forking: {
+        url: "https://api.avax.network/ext/bc/C/rpc",
+        blockNumber: 12482224,
+      },
+    },
+    dashboard: {
+      url: "http://localhost:24012/rpc",
+    },
   },
   gasReporter: {
     enabled: process.env.REPORT_GAS !== undefined,

@@ -63,9 +63,9 @@ contract KeenGenesisRewardPool {
     // END TESTNET
 
     // MAINNET
-    uint256 public keenPerSecond = 0.017361111 ether; // 2000 KEEN / (48h * 60min * 60s)
-    uint256 public runningTime = 2 days; // 2 days
-    uint256 public constant TOTAL_REWARDS = 3000 ether;
+    uint256 public keenPerSecond = 0.023148148 ether; // 2000 KEEN / (48h * 60min * 60s)
+    uint256 public runningTime = 1 days; // 1 day
+    uint256 public constant TOTAL_REWARDS = 2000 ether;
     // END MAINNET
 
     event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
