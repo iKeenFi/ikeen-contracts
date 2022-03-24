@@ -51,6 +51,7 @@ const config: HardhatUserConfig = {
     },
     dashboard: {
       url: "http://localhost:24012/rpc",
+      timeout: 314159265,
     },
   },
   gasReporter: {
