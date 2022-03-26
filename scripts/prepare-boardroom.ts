@@ -1,11 +1,8 @@
-const KEEN_AVAX_LP = "0xa96C4f4960C43D2649Ac4eDc281e2172d632866f";
 const KEEN_ADDRESS = "0x7254000925E19d9bEF3B156E9b0ADC24C9761E0E";
 const ISKEEN_ADDRESS = "0xAC53b3dFB93CCcEaE015E7B5C1Cef4681a2D3d9e";
-const iSKEEN_AVAX_LP = "0x01870c499db548c4de0da05180365d32603262a2";
-const WAVAX_ADDRESS = "0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7";
-const MIM_ADDRESS = "0x130966628846bfd36ff31a822705796e8cb8c18d";
-const GRAPE_ADDRESS = "0x5541d83efad1f281571b343977648b75d95cdac2";
-const WHITELIST_ADDRESS = "0x463791E15CcAe33de02C2B247aa75E8d4c2d9980";
+const BOND_ADDRESS = "0x1B5195c40adB6D1d3fdB17E6fb98b80726D1Aa9e";
+const BOARDROOM_ADDRESS = "0x74FDfe319eedF8b44e97E5d9FE2f5fea97d16de2";
+const TREASURY_ADDRESS = "0xDF2127A8099AF98f401eF7cb8d5eae68d7F2716c";
 
 // length of epoch, in seconds
 const PERIOD_LENGTH = 6 * 60 * 60;
@@ -33,40 +30,53 @@ async function main() {
   // manually to make sure everything is compiled
   // await hre.run('compile');
 
-  // We get the contract to deploy
-  const ISKEENRewardPool = await ethers.getContractFactory("iSKEENRewardPool");
+  // We get the contracts
+  const iBKEEN = await ethers.getContractFactory("iBKEEN");
+  const KEEN = await ethers.getContractFactory("KEEN");
+  const Boardroom = await ethers.getContractFactory("Boardroom");
   const iSKEEN = await ethers.getContractFactory("iSKEEN");
+  const Treasury = await ethers.getContractFactory("Treasury");
 
-  // impersonation
-  /*await ethers.provider.send("hardhat_impersonateAccount", [
-    "0x3e86ab8925af073e1f1b3780d9cb77550ee19a6e",
-  ]);
-  let signer = await ethers.getSigner(
-    "0x3e86ab8925af073e1f1b3780d9cb77550ee19a6e"
+  // Connect the contracts
+  const keen = KEEN.attach(KEEN_ADDRESS);
+  const boardroom = Boardroom.attach(BOARDROOM_ADDRESS);
+  const iskeen = iSKEEN.attach(ISKEEN_ADDRESS);
+  const ibkeen = iBKEEN.attach(BOND_ADDRESS);
+  const treasury = Treasury.attach(TREASURY_ADDRESS);
+
+  /*// Grant operator of KEEN, iSKEEN, iBKEEN & Boardroom to the treasury
+  // This is IRREVERSIBLE!
+  let keenTx = await keen.transferOperator(treasury.address);
+  console.log(
+    "KEEN has been renounced: https://snowtrace.io/tx/" + keenTx.hash
+  );
+
+  let iskeenTx = await iskeen.transferOperator(treasury.address);
+  console.log(
+    "iSKEEN has been renounced: https://snowtrace.io/tx/" + iskeenTx.hash
+  );
+
+  let ibkeenTx = await ibkeen.transferOperator(treasury.address);
+  console.log(
+    "iBKEEN has been renounced: https://snowtrace.io/tx/" + ibkeenTx.hash
+  );
+
+  // The boardroom is a special pickle,
+  // it has setOperator() instead of
+  // transfer.
+  let boardroomTx = await boardroom.setOperator(treasury.address);
+  console.log(
+    "Boardroom has been renounced: https://snowtrace.io/tx/" + boardroomTx.hash
   );*/
 
-  let pool = await ISKEENRewardPool.deploy(ISKEEN_ADDRESS, START_TIME);
-  await pool.deployed();
-
-  console.log("iSKEEN reward pool launched: " + pool.address);
-  console.log("Adding tokens...");
-
-  let iskeenAvaxTx = await pool.add(30, iSKEEN_AVAX_LP, false, START_TIME);
-  console.log("added iSKEEN-AVAX: " + iskeenAvaxTx.hash);
-
-  let wavaxTx = await pool.add(40, KEEN_AVAX_LP, false, START_TIME);
-  console.log("added KEEN-AVAX: " + wavaxTx.hash);
-
-  let usdcTx = await pool.add(30, KEEN_ADDRESS, true, START_TIME);
-  console.log("added KEEN: " + usdcTx.hash);
-
-  // beg for monies from the iSKEEN contract
-  let iskeen = iSKEEN.attach(ISKEEN_ADDRESS);
-
-  let rewardTx = await iskeen.distributeReward(pool.address);
-  console.log("REWARDS HAVE BEEN ENGIVENED: " + rewardTx.hash);
-
-  console.log("ALL DONE! ALL ENGINES FIRE!");
+  // We still have operator control over Treasury,
+  // so let's use that and ACTIVATE THE BOARDROOM!
+  let allocateTx = await treasury.allocateSeigniorage();
+  console.log(
+    "Boardroom has been allocated seigniorage: https://snowtrace.io/tx/" +
+      allocateTx.hash
+  );
+  console.log("Don't stop the rocket!");
 }
 
 // We recommend this pattern to be able to use async/await everywhere
