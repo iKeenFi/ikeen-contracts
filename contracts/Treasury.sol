@@ -39,6 +39,7 @@ contract Treasury is ContractGuard {
 
     // exclusions from total supply
     address[] public excludedFromTotalSupply = [
+        // oh shit
         address(0xB7e1E341b2CBCc7d1EdF4DC6E5e962aE5C621ca5), // KeenGenesisRewardPool
         address(0x04b79c851ed1A36549C6151189c79EC0eaBca745) // KeenRewardPool
     ];
